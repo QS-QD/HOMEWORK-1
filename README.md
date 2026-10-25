@@ -22,6 +22,8 @@ $A = U \Sigma V^{\mathsf{T}}$
 
 等价形式：$A = \sum_{i=1}^{r} \sigma_i u_i v_i^{\mathsf{T}}$，即 $A$ 是 $r$ 个秩一矩阵的加权和。
 
+**与特征值分解（EVD）的关系：** EVD 只对方阵存在，且要求可对角化；SVD 对任意形状、任意矩阵都存在。当 $A$ 是半正定对称矩阵时，SVD 退化为 EVD。SVD 中的 $U$、$V$ 都是正交矩阵，只含旋转/反射，矩阵的全部"拉伸"信息都集中在对角元 $\sigma_i$ 上——这正是 SVD 比 EVD 更本质的原因：任何线性变换都可以理解为"旋转 → 缩放 → 再旋转"。
+
 ### 1.2 分解过程推导
 
 **第一步：考察 $A^{\mathsf{T}}A$ 的特征结构。**
@@ -40,11 +42,13 @@ $u_i = \frac{1}{\sigma_i} A v_i$
 
 $u_i^{\mathsf{T}} u_j = \frac{v_i^{\mathsf{T}} A^{\mathsf{T}} A v_j}{\sigma_i \sigma_j} = \frac{\lambda_j}{\sigma_i \sigma_j} v_i^{\mathsf{T}} v_j = \delta_{ij}$
 
+（$\delta_{ij}$ 为 Kronecker 记号：$i=j$ 时为 $1$，否则为 $0$。）
+
 故 $u_1, \dots, u_r$ 是 $\mathbb{R}^m$ 中的单位正交组，将其扩充为完整标准正交基即得 $U$。
 
 **第三步：验证 $A = U\Sigma V^{\mathsf{T}}$。**
 
-只需验证两边作用在 $V$ 的每一列上相等。对 $i \le r$，有 $A v_i = \sigma_i u_i = U \Sigma V^{\mathsf{T}} v_i$；对 $i > r$（零空间部分），两边作用结果均为 $0$。故等式成立。
+只需验证两边作用在 $V$ 的每一列上相等。对 $i \le r$，有 $A v_i = \sigma_i u_i = U \Sigma V^{\mathsf{T}} v_i$；对 $i > r$（零空间部分），两边作用结果均为 $0$。故等式成立。$\square$
 
 ### 1.3 实例：手工完成一个 2×2 矩阵的 SVD
 
@@ -67,21 +71,54 @@ $\sigma_1 = 2\sqrt{10}, \qquad \sigma_2 = \sqrt{10}$
 
 **（3）求左奇异向量 $U$：**
 
-$u_1 = \frac{Av_1}{\sigma_1} = \frac{1}{2\sqrt{10}} \begin{pmatrix} 2\sqrt{2} \\ 4\sqrt{2} \end{pmatrix} = \frac{1}{\sqrt{5}}\begin{pmatrix} 1 \\ 2 \end{pmatrix}$
+先算 $Av_1$ 与 $Av_2$：
 
-$u_2 = \frac{Av_2}{\sigma_2} = \frac{1}{\sqrt{10}} \begin{pmatrix} 2\sqrt{2} \\ -\sqrt{2} \end{pmatrix} = \frac{1}{\sqrt{5}}\begin{pmatrix} 2 \\ -1 \end{pmatrix}$
+$Av_1 = \begin{pmatrix} 2\sqrt{2} \\ 4\sqrt{2} \end{pmatrix}, \qquad Av_2 = \begin{pmatrix} 2\sqrt{2} \\ -\sqrt{2} \end{pmatrix}$
+
+于是
+
+$u_1 = \frac{Av_1}{\sigma_1} = \frac{1}{\sqrt{5}}\begin{pmatrix} 1 \\ 2 \end{pmatrix}, \qquad u_2 = \frac{Av_2}{\sigma_2} = \frac{1}{\sqrt{5}}\begin{pmatrix} 2 \\ -1 \end{pmatrix}$
 
 **（4）写出分解结果：**
 
-$\underbrace{\begin{pmatrix} 4 & 0 \\ 3 & -5 \end{pmatrix}}_{A} = \underbrace{\frac{1}{\sqrt{5}}\begin{pmatrix} 1 & 2 \\ 2 & -1 \end{pmatrix}}_{U} \, \underbrace{\begin{pmatrix} 2\sqrt{10} & 0 \\ 0 & \sqrt{10} \end{pmatrix}}_{\Sigma} \, \underbrace{\frac{1}{\sqrt{2}}\begin{pmatrix} 1 & 1 \\ -1 & 1 \end{pmatrix}}_{V^{\mathsf{T}}}$
+三个因子矩阵分别为
+
+$U = \frac{1}{\sqrt{5}}\begin{pmatrix} 1 & 2 \\ 2 & -1 \end{pmatrix}$
+
+$\Sigma = \begin{pmatrix} 2\sqrt{10} & 0 \\ 0 & \sqrt{10} \end{pmatrix}$
+
+$V = \frac{1}{\sqrt{2}}\begin{pmatrix} 1 & 1 \\ -1 & 1 \end{pmatrix}$
+
+即 $A = U \Sigma V^{\mathsf{T}}$，且 $\sigma_1 = 2\sqrt{10} \approx 6.32$，$\sigma_2 = \sqrt{10} \approx 3.16$。
 
 **（5）回代验证：**
 
-$U\Sigma V^{\mathsf{T}} = \frac{1}{\sqrt{5}}\begin{pmatrix} 1 & 2 \\ 2 & -1 \end{pmatrix} \begin{pmatrix} 2\sqrt{5} & -2\sqrt{5} \\ \sqrt{5} & \sqrt{5} \end{pmatrix} = \begin{pmatrix} 4 & 0 \\ 3 & -5 \end{pmatrix} = A$
+先算乘积
 
-验证通过。
+$\Sigma V^{\mathsf{T}} = \begin{pmatrix} 2\sqrt{5} & -2\sqrt{5} \\ \sqrt{5} & \sqrt{5} \end{pmatrix}$
 
-### 1.4 几何意义
+于是
+
+$U \Sigma V^{\mathsf{T}} = \frac{1}{\sqrt{5}}\begin{pmatrix} 1 & 2 \\ 2 & -1 \end{pmatrix} \begin{pmatrix} 2\sqrt{5} & -2\sqrt{5} \\ \sqrt{5} & \sqrt{5} \end{pmatrix} = \begin{pmatrix} 4 & 0 \\ 3 & -5 \end{pmatrix} = A$
+
+验证通过。$\checkmark$
+
+### 1.4 基本性质
+
+由 SVD 可以导出矩阵的重要度量：
+
+- **谱范数**（最大拉伸倍数）：$\|A\|_2 = \sigma_1$
+- **Frobenius 范数**：$\|A\|_F = \sqrt{\sum_{i=1}^{r} \sigma_i^2}$
+- **秩**：$r$ 等于非零奇异值的个数
+- **条件数**：$\kappa(A) = \sigma_1 / \sigma_r$，衡量矩阵求逆的数值稳定性
+
+**Eckart–Young 定理（最佳低秩近似）：** 在所有秩不超过 $k$ 的矩阵中，截断 SVD
+
+$A_k = \sum_{i=1}^{k} \sigma_i u_i v_i^{\mathsf{T}}$
+
+是 $A$ 在谱范数和 Frobenius 范数意义下的最优近似。这是 PCA、图像压缩、推荐系统中矩阵分解、去噪的理论基础：保留前 $k$ 个奇异值对应的成分，就保留了矩阵的主要信息。
+
+### 1.5 几何意义
 
 SVD 揭示了一个线性变换 $x \mapsto Ax$ 的三步几何过程：**旋转/反射**（$V^{\mathsf{T}}$）→ **沿坐标轴缩放**（$\Sigma$，缩放因子即奇异值）→ **再旋转/反射**（$U$）。最大的奇异值 $\sigma_1$ 表示该变换的最大"拉伸倍数"，对应矩阵的谱范数 $\|A\|_2 = \sigma_1$。
 
@@ -98,6 +135,12 @@ $p(\theta \mid D) = \frac{p(D \mid \theta) \, p(\theta)}{p(D)}$
 三要素：$p(\theta)$ 为**先验**（数据到来之前的经验），$p(D \mid \theta)$ 为**似然**（数据由参数生成的概率），$p(\theta \mid D)$ 为**后验**（看到数据之后的认知）。
 
 与频率学派"参数是固定未知量"不同，贝叶斯学派的学习过程是**先验 → 数据 → 后验**的连续更新：每次获得新数据，就把当前的后验当作下一步的先验，实现知识的递推积累。
+
+**后验分布到手后，如何给出点估计？** 常见三种方式：
+
+- **后验均值**：$E[\theta \mid D]$，最小化平方误差，最常用；
+- **后验中位数**：最小化绝对误差，对偏态分布更稳健；
+- **最大后验估计（MAP）**：$\hat{\theta} = \arg\max_{\theta} p(\theta \mid D)$，等价于带正则项的极大似然——先验在这里扮演了正则化的角色。
 
 ### 2.2 项目案例：课程项目"校园二手书交易平台"的转化率评估
 
@@ -119,6 +162,8 @@ $p(D \mid \theta) = \binom{n}{k} \theta^{k} (1-\theta)^{n-k} \propto \theta^{k} 
 
 $p(\theta) = \frac{1}{B(\alpha,\beta)} \, \theta^{\alpha-1}(1-\theta)^{\beta-1}$
 
+选 Beta 分布有两个理由：其一，它支撑在 $(0,1)$ 上，天然适合表达"比率"类参数；其二，它与二项似然**共轭**——后验仍是 Beta 分布，可以推导出解析解，无需数值积分。
+
 **第三步：推导后验分布（共轭更新）。**
 
 $p(\theta \mid D) \propto \theta^{k}(1-\theta)^{n-k} \cdot \theta^{\alpha-1}(1-\theta)^{\beta-1} = \theta^{\alpha+k-1}(1-\theta)^{\beta+n-k-1}$
@@ -127,13 +172,15 @@ $p(\theta \mid D) \propto \theta^{k}(1-\theta)^{n-k} \cdot \theta^{\alpha-1}(1-\
 
 $\theta \mid D \sim \mathrm{Beta}(\alpha + k,\ \beta + n - k)$
 
+**直观解读：** 后验参数就是"先验虚拟样本 + 实际样本"，$\alpha$ 相当于先验中的"成功次数"，$\beta$ 相当于"失败次数"。贝叶斯更新在这里表现得像一种加权融合。
+
 **第四步：代入数据计算。**
 
 灰度测试结果为 $n = 200$ 人、$k = 16$ 人点击，后验为
 
 $\theta \mid D \sim \mathrm{Beta}(21,\ 279)$
 
-后验均值为 $\frac{21}{300} = 7\%$，较先验的 5% 明显上移。
+后验均值为 $\frac{21}{300} = 7\%$，较先验的 5% 明显上移；后验标准差约为 $\sqrt{\frac{21 \times 279}{300^2 \times 301}} \approx 1.44\%$，估计的不确定性也清晰可见。
 
 **第五步：做出概率化决策（贝叶斯方法相对显著性检验的最大优势）。**
 
@@ -167,7 +214,7 @@ $H(p) = -\sum_{x} p(x) \log p(x)$
 
 $H(p, q) = -\sum_{x} p(x) \log q(x)$
 
-注意 $H(p,q)$ 对 $p$ 和 $q$ **不对称**，一般 $H(p,q) \ne H(q,p)$。
+注意 $H(p,q)$ 对 $p$ 和 $q$ **不对称**，一般 $H(p,q) \ne H(q,p)$。不对称的含义很直白：用"猫的编码方案"去编码"狗的分布"浪费的字节数，和反过来是不一样的。
 
 ### 3.2 与 KL 散度的关系（原理核心）
 
@@ -177,11 +224,15 @@ $D_{\mathrm{KL}}(p \| q) = \sum_{x} p(x) \log \frac{p(x)}{q(x)}$
 
 展开即得三者关系：
 
-$H(p, q) = \underbrace{D_{\mathrm{KL}}(p \| q)}_{\text{分布差异}} + \underbrace{H(p)}_{\text{常数项}}$
+$H(p, q) = D_{\mathrm{KL}}(p \| q) + H(p)$
+
+（$D_{\mathrm{KL}}(p \| q) \ge 0$ 为分布差异项，$H(p)$ 是不依赖 $q$ 的常数项。）
 
 由于 $H(p)$ 不依赖 $q$，**最小化交叉熵等价于最小化 $D_{\mathrm{KL}}(p\|q)$**，即让预测分布 $q$ 逼近真实分布 $p$。这就是交叉熵能作为分类损失函数的理论依据。
 
 另外由 Gibbs 不等式 $D_{\mathrm{KL}}(p\|q) \ge 0$ 可知 $H(p,q) \ge H(p)$，当且仅当 $q = p$ 时取等号——交叉熵有理论下界。
+
+**与极大似然的联系：** 设训练数据的真实分布为 $p$，模型输出的预测分布为 $q_{\theta}$，对数似然为 $\sum_x p(x) \log q_{\theta}(x)$。最大化对数似然恰好等价于最小化交叉熵 $H(p, q_{\theta})$。所以"用交叉熵训练分类网络"本质上就是在做**极大似然估计**——交叉熵损失不是经验选择，而是有统计学原理支撑的。
 
 ### 3.3 应用实例：Softmax + 交叉熵的完整推导
 
@@ -217,6 +268,8 @@ $\frac{\partial L}{\partial z_j} = q_j - p_j$
 
 **结果解读：** 梯度形式极其简洁——"预测概率 − 真实标签"。预测越准（$q_y \to 1$）梯度越小，学习自动减速；预测越离谱梯度越大，修正力度越强。这一性质使交叉熵成为分类任务的标准损失函数。
 
+**为什么分类任务不用均方误差（MSE）？** 以二分类 Sigmoid 输出为例，MSE 的梯度中含有因子 $q(1-q)$：当输出接近 $0$ 或 $1$（饱和区）时梯度趋近于零，模型会"卡死"学不动；而交叉熵的梯度 $q - p$ 在错误饱和时依然很大，能持续给出强修正信号。这是分类任务选择交叉熵而非 MSE 的根本原因。
+
 ### 3.4 数值例子验证
 
 | 预测分布 $q$（真实类别为猫）        | 交叉熵损失 $-\log q_1$ | 含义           |
@@ -228,11 +281,19 @@ $\frac{\partial L}{\partial z_j} = q_j - p_j$
 
 可见交叉熵同时惩罚"错误"和"过度自信的错误"，这正是分类模型训练所期望的行为。
 
+### 3.5 典型应用场景
+
+- **分类网络训练**：Softmax + 交叉熵是图像分类、文本分类的默认配置；
+- **知识蒸馏**：用教师模型的软标签分布 $p_{\mathrm{teacher}}$ 替代 one-hot 标签，让学生网络学习类别间的相似性信息，损失函数就是两分布的交叉熵；
+- **语言模型**：每个位置的预测损失即交叉熵，困惑度（Perplexity）定义为平均交叉熵的指数 $e^{H(p,q)}$；
+- **强化学习中的策略梯度**：策略改进目标等价于最小化新旧策略分布的交叉熵类目标。
+
 ---
 
 ## 参考文献
 
-1. Golub, G. H., & Van Loan, C. F. *Matrix Computations*.（SVD 理论）
+1. Golub, G. H., & Van Loan, C. F. *Matrix Computations*.（SVD 理论与 Eckart–Young 定理）
 2. Murphy, K. P. *Machine Learning: A Probabilistic Perspective*.（贝叶斯建模与共轭先验）
 3. Shannon, C. E. (1948). A Mathematical Theory of Communication.（信息熵与交叉熵）
-4. Goodfellow, I., et al. *Deep Learning*, Chapter 3.（Softmax 与交叉熵梯度）
+4. Goodfellow, I., et al. *Deep Learning*, Chapter 3 & 6.（Softmax、交叉熵梯度与极大似然）
+
